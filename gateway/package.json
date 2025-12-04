@@ -4,7 +4,8 @@
   "main": "src/gateway.js",
   "scripts": {
     "start": "node src/gateway.js",
-    "dev": "nodemon src/gateway.js"
+    "dev": "nodemon src/gateway.js",
+    "test": "echo \"No tests yet\" && exit 0"
   },
   "dependencies": {
     "express": "^4.18.2",
