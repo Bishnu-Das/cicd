@@ -1,0 +1,85 @@
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  # -------------------------------
+  # 1. Build & Test Job
+  # -------------------------------
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: npm test
+
+      - name: Install gateway dependencies
+        working-directory: ./gateway
+        run: npm install
+
+      - name: Run gateway tests
+        working-directory: ./gateway
+        run: npm test
+
+  # -------------------------------
+  # 2. Build & Push Docker Images
+  # -------------------------------
+  docker-build-push:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Backend Image
+        run: |
+          docker build -t yourdockerhubuser/cuet-backend:latest ./backend
+          docker push yourdockerhubuser/cuet-backend:latest
+
+      - name: Build & Push Gateway Image
+        run: |
+          docker build -t yourdockerhubuser/cuet-gateway:latest ./gateway
+          docker push yourdockerhubuser/cuet-gateway:latest
+
+  # -------------------------------
+  # 3. Deploy to Production
+  # -------------------------------
+  # deploy:
+  #   needs: docker-build-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: SSH to Server & Deploy
+  #       uses: appleboy/ssh-action@v0.1.6
+  #       with:
+  #         host: ${{ secrets.SERVER_IP }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SERVER_SSH_KEY }}
+  #         script: |
+  #           cd /home/ubuntu/project
+  #           docker compose pull
+  #           docker compose down
+  #           docker compose up -d
