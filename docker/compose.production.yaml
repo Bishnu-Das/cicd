@@ -1,6 +1,48 @@
-# services:
-  # backend:
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: cuet-backend:latest
+    container_name: cuet-backend
+    # Backend must not be exposed to the host per README; expose internally only
+    expose:
+      - "3847"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_PORT=3847
+      - MONGO_URI=mongodb://mongo:27017/merndb
+    env_file:
+      - ../.env
+    depends_on:
+      - mongo
 
-  # gateway:
+  gateway:
+    build:
+      context: ../gateway
+      dockerfile: Dockerfile
+    image: cuet-gateway:latest
+    container_name: cuet-gateway
+    ports:
+      - "5921:5921"
+    environment:
+      - BACKEND_URL=http://backend:3847
+      - GATEWAY_PORT=5921
+    env_file:
+      - ../.env
+    depends_on:
+      - backend
 
-  # mongo:
+  mongo:
+    image: mongo:6
+    container_name: cuet-mongo
+    expose:
+      - "27017"
+    volumes:
+      - mongo-data:/data/db
+    env_file:
+      - ../.env
+
+volumes:
+  mongo-data:

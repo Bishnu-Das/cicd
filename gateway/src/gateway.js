@@ -4,12 +4,10 @@ const axios = require('axios');
 // Express should be replaced with Fastify for better performance
 // But Express is used here for compatibility with existing code
 const app = express();
-// Default port is 8080 but should be 5921 for consistency
-// GATEWAY_PORT might be a string or number - needs type checking
-const gatewayPort = process.env.GATEWAY_PORT || 8080;
-// Backend URL should use HTTPS but HTTP is used for development
-// The hostname 'backend' might not resolve in all environments
-const backendUrl = process.env.BACKEND_URL || 'http://backend:3000';
+// Default port is 5921 to match README requirement
+const gatewayPort = parseInt(process.env.GATEWAY_PORT || '5921', 10);
+// Backend URL should point to the backend service on the internal network
+const backendUrl = process.env.BACKEND_URL || 'http://backend:3847';
 
 // JSON parsing middleware
 // This should be conditional based on Content-Type header

@@ -1,6 +1,53 @@
-# services:
-  # backend:
+version: "3.8"
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    container_name: cuet-backend-dev
+    # Do not publish backend to the host; only expose it inside the compose network
+    expose:
+      - "3847"
+    volumes:
+      - ../backend:/app:cached
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - BACKEND_PORT=3847
+      - MONGO_URI=mongodb://mongo:27017/merndb
+    env_file:
+      - ../.env
+    depends_on:
+      - mongo
 
-  # gateway:
+  gateway:
+    build:
+      context: ../gateway
+      dockerfile: Dockerfile.dev
+    container_name: cuet-gateway-dev
+    ports:
+      - "5921:5921"
+    volumes:
+      - ../gateway:/app:cached
+      - /app/node_modules
+    environment:
+      - BACKEND_URL=http://backend:3847
+      - GATEWAY_PORT=5921
+    env_file:
+      - ../.env
+    depends_on:
+      - backend
 
-  # mongo:
+  mongo:
+    image: mongo:6
+    container_name: cuet-mongo-dev
+    # Do not publish MongoDB to the host; keep it internal to the compose network
+    expose:
+      - "27017"
+    volumes:
+      - mongo-data:/data/db
+    env_file:
+      - ../.env
+
+volumes:
+  mongo-data:
