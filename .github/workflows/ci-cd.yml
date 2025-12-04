@@ -3,12 +3,11 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-
   # -------------------------------
   # 1. Build & Test Job
   # -------------------------------
@@ -21,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install backend dependencies
         working-directory: ./backend
@@ -57,13 +56,13 @@ jobs:
 
       - name: Build & Push Backend Image
         run: |
-          docker build -t yourdockerhubuser/cuet-backend:latest ./backend
-          docker push yourdockerhubuser/cuet-backend:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cuet-backend:latest ./backend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/cuet-backend:latest
 
       - name: Build & Push Gateway Image
         run: |
-          docker build -t yourdockerhubuser/cuet-gateway:latest ./gateway
-          docker push yourdockerhubuser/cuet-gateway:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cuet-gateway:latest ./gateway
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/cuet-gateway:latest
 
   # -------------------------------
   # 3. Deploy to Production
